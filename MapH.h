@@ -3,6 +3,8 @@
 class MapH : public ADTMap
 {
 private:
+    vector<pair<string, int>> v;
+
 public:
     MapH();
     ~MapH();
