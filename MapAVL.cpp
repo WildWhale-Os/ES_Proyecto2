@@ -128,7 +128,11 @@ void MapAVL ::insert(pair<string, int> item) {
     else
       actual = actual->hijoder;
   }
-  actual = new_node(item);
+  actual = pila.top();
+  if (actual->key > item.first)
+    actual->hijoizq = new_node(item);
+  else
+    actual->hijoder = new_node(item);
   mysize++;
   while (!pila.empty()) {
     actual = pila.top();
@@ -142,12 +146,18 @@ void MapAVL ::insert(pair<string, int> item) {
         nodo *hijo = actual->hijoder;
         if (hijo->key < item.first) { // derecha
           // zig zig izquerda
-          zigzigDerecha(actual, pila.top());
+          if (actual == root)
+            zigzigDerecha(actual, nullptr);
+          else
+            zigzigDerecha(actual, pila.top());
         }
         // izquierda
         else if (hijo->key > item.first) { // izquierda
           // zig zag derecha
-          zigzagDerecha(actual, pila.top());
+          if (actual == root)
+            zigzagDerecha(actual, nullptr);
+          else
+            zigzagDerecha(actual, pila.top());
         }
       }
       // izquerda
@@ -156,15 +166,18 @@ void MapAVL ::insert(pair<string, int> item) {
         // izquierda
         if (hijo->key > item.first) { // izquierda
           // zig zig derecha
-          if (actual == root) {
+          if (actual == root)
             zigzigIzquierda(actual, nullptr);
-          }
-          zigzigIzquierda(actual, pila.top());
+          else
+            zigzigIzquierda(actual, pila.top());
         }
         // derecha
         else if (hijo->key < item.first) { // derecha
           // zig zag izquierda derecha
-          zigzagIzquierda(actual, pila.top());
+          if (actual == root)
+            zigzagIzquierda(actual, nullptr);
+          else
+            zigzagIzquierda(actual, pila.top());
         }
       }
     }
