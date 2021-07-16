@@ -188,6 +188,7 @@ void MapAVL ::insert(pair<string, int> item) {
 int MapAVL ::at(string key) {
   nodo *actual = root;
   while (actual != nullptr) {
+    cout << actual->key << endl;
     if (actual->key == key)
       return actual->value;
     if (actual->key > key)
@@ -210,97 +211,224 @@ nodo *maximo(nodo *actual) {
     return actual;
   return maximo(actual->hijoder);
 }
-void MapAVL ::erase(string key) {
+// void MapAVL ::erase(string key) {
+//   nodo *actual = root;
+//   stack<nodo *> pila;
+//   nodo *borrado = nullptr;
+//   while (actual != nullptr && actual->key != key) {
+//     cout << actual->key << endl;
+//     pila.push(actual);
+//     if (actual->key < key)
+//       actual = actual->hijoder;
+//     else if (actual->key > key)
+//       actual = actual->hijoizq;
+//   }
+//   if (actual == nullptr)
+//     return;
+
+//   nodo *temp = nullptr;
+//   bool succesor;
+//   borrado = actual;
+//   mysize--;
+//   cout << mysize << endl;
+//   if (borrado->hijoder != nullptr) {
+//     temp = minimo(borrado->hijoder);
+//     succesor = true;
+//   } else if (borrado->hijoizq != nullptr) {
+//     temp = maximo(borrado->hijoizq);
+//     succesor = false;
+//   }
+//   if (temp != nullptr) {
+//     cout << temp->key << " " << temp->value << endl;
+
+//     if (!pila.empty()) {
+//       nodo *padre = pila.top();
+//       cout << "Padre" << padre->key << " " << padre->value << endl;
+//       if (padre->hijoizq == borrado)
+//         padre->hijoizq = temp;
+//       else
+//         padre->hijoder = temp;
+//     }
+
+//     nodo *padre = nullptr;
+//     pila.push(temp);
+//     if (succesor)
+//       actual = borrado->hijoder;
+//     else
+//       actual = borrado->hijoizq;
+//     while (actual->hijoder != nullptr && actual->hijoizq != nullptr) {
+//       pila.push(actual);
+//       if (succesor) {
+//         actual = actual->hijoizq;
+//       } else
+//         actual = actual->hijoder;
+//     }
+//     padre = pila.top();
+//     if (padre != temp) {
+//       if (succesor)
+//         padre->hijoizq = temp->hijoder;
+//       else
+//         padre->hijoder = temp->hijoizq;
+//     }
+//     if (succesor)
+//       temp->hijoizq = borrado->hijoizq;
+//     else
+//       temp->hijoder = borrado->hijoder;
+
+//     borrado->hijoizq = nullptr;
+//     borrado->hijoder = nullptr;
+//     if (root == borrado)
+//       root = temp;
+//   } else {
+//     nodo *padre = pila.top();
+//     if (padre->hijoizq == borrado)
+//       padre->hijoizq = nullptr;
+//     else
+//       padre->hijoder = nullptr;
+//   }
+
+//   delete borrado;
+//   cout << "balanceando\n";
+//   // balance
+//   while (!pila.empty()) {
+//     cout << pila.size() << endl;
+//     actual = pila.top();
+//     pila.pop();
+//     actual->height = 1 + max(height(actual->hijoizq),
+//     height(actual->hijoder)); int balance = abs(height(actual->hijoder) -
+//     height(actual->hijoizq)); if (balance > 1) {
+//       // derecha
+//       if (height(actual->hijoder) > height(actual->hijoizq)) { // derecha
+//         // derecha
+//         cout << "derecha\n";
+//         nodo *hijo = actual->hijoder;
+//         if (height(hijo->hijoder) > height(hijo->hijoizq)) { // derecha
+//           // zig zig izquerda
+//           cout << "derecha\n";
+//           if (actual == root)
+//             zigzigDerecha(actual, nullptr);
+//           else
+//             zigzigDerecha(actual, pila.top());
+//         }
+//         // izquierda
+//         else if (height(hijo->hijoder) < height(hijo->hijoizq)) { //
+//         izquierda
+//           // zig zag derecha
+//           cout << "izquierda\n";
+//           if (actual == root)
+//             zigzagDerecha(actual, nullptr);
+//           else
+//             zigzagDerecha(actual, pila.top());
+//         }
+//       }
+//       // izquerda
+//       else if (height(actual->hijoder) < height(actual->hijoizq)) { //
+//       izquierda
+//         nodo *hijo = actual->hijoizq;
+//         // izquierda
+//         cout << "izquierda\n";
+//         if (height(hijo->hijoder) < height(hijo->hijoizq)) { // izquierda
+//           // zig zig izquierda
+//           cout << "Izquerda\n";
+//           if (actual == root)
+//             zigzigIzquierda(actual, nullptr);
+//           else
+//             zigzigIzquierda(actual, pila.top());
+//         }
+//         // derecha
+//         else if (height(hijo->hijoder) > height(hijo->hijoizq)) { // derecha
+//           // zig zag izquierda derecha
+//           cout << "derecha\n";
+//           if (actual == root) {
+//             cout << root->key << endl;
+//             zigzagIzquierda(actual, nullptr);
+//             cout << root->key << endl;
+//           } else {
+//             cout << actual->key << endl;
+//             zigzagIzquierda(actual, pila.top());
+//             cout << actual->key << endl;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+
+void MapAVL::erase(string key) {
   nodo *actual = root;
-  stack<nodo *> pila;
-  nodo *borrado = nullptr;
-  nodo *temp;
-  bool succesor;
-  while (actual != nullptr && actual->key != key) {
-    pila.push(actual);
+  stack<nodo *> path;
+  path.push(nullptr);
+
+  while (!actual && actual->key != key) {
+    path.push(actual);
     if (actual->key < key)
       actual = actual->hijoder;
     else if (actual->key > key)
       actual = actual->hijoizq;
   }
-  if (actual == nullptr)
+  // si actual == nullptr no esta la key
+  if (!actual)
     return;
-  borrado = actual;
-  if (actual->hijoder != nullptr) {
-    temp = minimo(actual->hijoder);
+  // buscamos succesor o antescesor
+  nodo *change = nullptr;
+  nodo *borrado = actual;
+  nodo *padre = nullptr;
+  bool succesor;
+  if (actual->hijoder) {
+    change = minimo(actual->hijoder);
     succesor = true;
-  } else if (actual->hijoizq != nullptr) {
-    temp = maximo(actual->hijoizq);
+  } else if (actual->hijoizq) {
+    change = maximo(actual->hijoizq);
     succesor = false;
   }
-  if (temp != nullptr) {
-    nodo *padre = pila.top();
-
-    temp->hijoizq = actual->hijoizq;
-    temp->hijoder = actual->hijoder;
-
-    actual->hijoizq = nullptr;
-    actual->hijoder = nullptr;
-
-    if (padre->hijoizq == borrado)
-      padre->hijoizq = temp;
-    else
-      padre->hijoder = temp;
-
-    pila.push(temp);
-    if (succesor)
-      actual = temp->hijoder;
-    else
-      actual = temp->hijoizq;
-    while (actual->hijoder != nullptr && actual->hijoizq != nullptr) {
-      pila.push(actual);
-      if (succesor) {
-        actual = actual->hijoizq;
-      } else
-        actual = actual->hijoder;
-    }
-    padre = pila.top();
-    if (succesor) {
-      padre->hijoizq = nullptr;
+  // if change == nullptr eliminamos una hoja
+  if (!change) {
+    padre = path.top();
+    if (padre) {
+      if (padre->key < borrado->key)
+        padre->hijoder = nullptr;
+      else
+        padre->hijoizq = nullptr;
     } else
-      padre->hijoder = nullptr;
+      root = nullptr;
   }
-
-  // balance
-  while (!pila.empty()) {
-    actual = pila.top();
-    pila.pop();
-    actual->height = 1 + max(height(actual->hijoizq), height(actual->hijoder));
-    int balance = abs(height(actual->hijoder) - height(actual->hijoizq));
-    if (balance > 1) {
-      // derecha
-      if (height(actual->hijoder) > height(actual->hijoizq)) { // derecha
-        // derecha
-        nodo *hijo = actual->hijoder;
-        if (height(hijo->hijoder) > height(hijo->hijoizq)) { // derecha
-          // zig zig izquerda
-          zigzigDerecha(actual, pila.top());
-        }
-        // izquierda
-        else if (height(hijo->hijoder) < height(hijo->hijoizq)) { // izquierda
-          // zig zag derecha
-          zigzagDerecha(actual, pila.top());
-        }
+  // si actual == root path solo un null pointer
+  else if (borrado == root) {
+    path.push(change);
+    nodo *travel;
+    if (succesor) {
+      travel = borrado->hijoder;
+      if (change == travel) {
+        change->hijoizq = root->hijoizq;
       }
-      // izquerda
-      else if (height(actual->hijoder) < height(actual->hijoizq)) { // izquierda
-        nodo *hijo = actual->hijoizq;
-        // izquierda
-        if (height(hijo->hijoder) < height(hijo->hijoizq)) { // izquierda
-          // zig zig derecha
-          zigzigIzquierda(actual, pila.top());
-        }
-        // derecha
-        else if (height(hijo->hijoder) > height(hijo->hijoizq)) { // derecha
-          // zig zag izquierda derecha
-          zigzagIzquierda(actual, pila.top());
-        }
+    } else {
+      travel = borrado->hijoizq;
+      if (change == travel) {
+        change->hijoder = root->hijoder;
       }
     }
+    while (travel != change) {
+      padre = travel;
+      if (succesor)
+        travel = travel->hijoizq;
+      else
+        travel = travel->hijoder;
+    }
+    if (padre) {
+      if (succesor)
+        padre->hijoizq = travel->hijoder;
+      else
+        padre->hijoder = travel->hijoizq;
+    }
+    if(succesor)
+      change->hijoder = root->hijoder;
+    else
+      change->hijoizq = root->hijoizq;
+    root = change;
   }
+
+  // si actual != root path como minimo posee nullptr y root
+  else {
+  }
+  delete borrado;
 }
