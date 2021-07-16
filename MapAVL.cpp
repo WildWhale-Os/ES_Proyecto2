@@ -1,5 +1,6 @@
 #include "MapAVL.h"
 #include <stack>
+#include <utility>
 
 MapAVL ::MapAVL() {
   mysize = 0;
@@ -184,26 +185,88 @@ void MapAVL ::insert(pair<string, int> item) {
   }
 }
 
-void MapAVL ::erase(string key) {
+int MapAVL ::at(string key) {
   nodo *actual = root;
-  stack<nodo *> pila;
-
   while (actual != nullptr) {
-    if (actual->key == key) {
-      delete actual;
-      mysize--;
-      break;
-    }
-    pila.push(actual);
+    if (actual->key == key)
+      return actual->value;
     if (actual->key > key)
       actual = actual->hijoizq;
     else
       actual = actual->hijoder;
   }
+  return -1;
+}
+int MapAVL ::size() { return mysize; }
+bool MapAVL ::empty() { return mysize == 0; }
 
+nodo *minimo(nodo *actual) {
+  if (actual->hijoizq == nullptr)
+    return actual;
+  return minimo(actual->hijoizq);
+}
+nodo *maximo(nodo *actual) {
+  if (actual->hijoder == nullptr)
+    return actual;
+  return maximo(actual->hijoder);
+}
+void MapAVL ::erase(string key) {
+  nodo *actual = root;
+  stack<nodo *> pila;
+  nodo *borrado = nullptr;
+  nodo *temp;
+  bool succesor;
+  while (actual != nullptr && actual->key != key) {
+    pila.push(actual);
+    if (actual->key < key)
+      actual = actual->hijoder;
+    else if (actual->key > key)
+      actual = actual->hijoizq;
+  }
   if (actual == nullptr)
     return;
+  borrado = actual;
+  if (actual->hijoder != nullptr) {
+    temp = minimo(actual->hijoder);
+    succesor = true;
+  } else if (actual->hijoizq != nullptr) {
+    temp = maximo(actual->hijoizq);
+    succesor = false;
+  }
+  if (temp != nullptr) {
+    nodo *padre = pila.top();
 
+    temp->hijoizq = actual->hijoizq;
+    temp->hijoder = actual->hijoder;
+
+    actual->hijoizq = nullptr;
+    actual->hijoder = nullptr;
+
+    if (padre->hijoizq == borrado)
+      padre->hijoizq = temp;
+    else
+      padre->hijoder = temp;
+
+    pila.push(temp);
+    if (succesor)
+      actual = temp->hijoder;
+    else
+      actual = temp->hijoizq;
+    while (actual->hijoder != nullptr && actual->hijoizq != nullptr) {
+      pila.push(actual);
+      if (succesor) {
+        actual = actual->hijoizq;
+      } else
+        actual = actual->hijoder;
+    }
+    padre = pila.top();
+    if (succesor) {
+      padre->hijoizq = nullptr;
+    } else
+      padre->hijoder = nullptr;
+  }
+
+  // balance
   while (!pila.empty()) {
     actual = pila.top();
     pila.pop();
@@ -238,22 +301,6 @@ void MapAVL ::erase(string key) {
           zigzagIzquierda(actual, pila.top());
         }
       }
-      root = actual;
     }
   }
 }
-
-int MapAVL ::at(string key) {
-  nodo *actual = root;
-  while (actual != nullptr) {
-    if (actual->key == key)
-      return actual->value;
-    if (actual->key > key)
-      actual = actual->hijoizq;
-    else
-      actual = actual->hijoder;
-  }
-  return -1;
-}
-int MapAVL ::size() { return mysize; }
-bool MapAVL ::empty() { return mysize == 0; }
