@@ -1,6 +1,6 @@
-#include "ES_Proyecto2/MapAVL.h"
-#include "ES_Proyecto2/MapH.h"
-#include "ES_Proyecto2/MapSV.h"
+#include "MapAVL.h"
+#include "MapH.h"
+#include "MapSV.h"
 #include <algorithm>
 #include <fstream>
 #include <time.h>
